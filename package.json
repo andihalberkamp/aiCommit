@@ -1,0 +1,34 @@
+{
+  "name": "aicommit",
+  "version": "1.0.0",
+  "description": "Generate clean git commit messages from staged changes using Codex.",
+  "type": "module",
+  "bin": {
+    "aicommit": "./bin/aicommit.js"
+  },
+  "keywords": [
+    "git",
+    "commit",
+    "cli",
+    "codex",
+    "automation",
+    "productivity"
+  ],
+  "license": "MIT",
+  "author": "",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/your-username/aicommit.git"
+  },
+  "bugs": {
+    "url": "https://github.com/your-username/aicommit/issues"
+  },
+  "homepage": "https://github.com/your-username/aicommit#readme",
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "start": "node ./bin/aicommit.js",
+    "test": "node --eval \"console.log('No tests yet')\""
+  }
+}
