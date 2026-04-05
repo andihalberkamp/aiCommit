@@ -13,7 +13,7 @@ Thanks for your interest in contributing to `aicommit`.
 ## Development setup
 
 ```bash
-git clone https://github.com/your-username/aicommit.git
+git clone https://github.com/andihalberkamp/aiCommit.git
 cd aicommit
 npm install
 npm link
