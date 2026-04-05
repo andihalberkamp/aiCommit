@@ -1,3 +1,5 @@
+[![npm downloads](https://img.shields.io/npm/dm/%40ahalberkamp%2Faicommit?logo=npm)](https://www.npmjs.com/package/@ahalberkamp/aicommit)
+
 <p align="center">
   <img src="https://raw.githubusercontent.com/andihalberkamp/aiCommit/main/assets/aicommit-logo.png" alt="AICommit logo" width="320" />
 </p>
