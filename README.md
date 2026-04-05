@@ -180,16 +180,6 @@ Before publishing or using this tool broadly:
 - do not embed private repository URLs
 - do not rely on company-specific branch naming rules unless documented
 
-## Publish To npm
-
-To publish the scoped package:
-
-```bash
-npm login
-npm run pack:check
-npm publish --access=public
-```
-
 ## Contributing
 
 Contributions are welcome. Please open an issue or submit a pull request.
