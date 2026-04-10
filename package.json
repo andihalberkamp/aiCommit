@@ -1,7 +1,7 @@
 {
   "name": "@ahalberkamp/aicommit",
-  "version": "1.0.0",
-  "description": "Generate clean git commit messages from staged changes using Codex.",
+  "version": "1.0.1",
+  "description": "Generate clean git commit messages from staged changes using Codex or Claude Code.",
   "type": "module",
   "files": [
     "bin/aicommit.js",
@@ -15,6 +15,7 @@
     "commit",
     "cli",
     "codex",
+    "claude",
     "automation",
     "productivity"
   ],

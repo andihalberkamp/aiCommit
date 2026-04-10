@@ -1,17 +1,17 @@
 [![npm downloads](https://img.shields.io/npm/dm/%40ahalberkamp%2Faicommit?logo=npm)](https://www.npmjs.com/package/@ahalberkamp/aicommit)
 <p align="center">
-  <img src="https://raw.githubusercontent.com/andihalberkamp/aiCommit/main/assets/aicommit-logo.png" alt="AICommit logo" width="320" />
+  <img src="https://raw.githubusercontent.com/andihalberkamp/aiCommit/main/assets/aicommit-logo.svg" alt="AICommit logo showing Codex and Claude Code support" width="560" />
 </p>
 
 # aicommit
 
-Generate clean Git commit messages from staged changes using Codex.
+Generate clean Git commit messages from staged changes using Codex or Claude Code.
 
 ## Features
 
 - Stages files and folders you pass in
 - Reads the staged Git diff
-- Uses Codex to suggest a commit message
+- Uses Codex or Claude Code to suggest a commit message
 - Detects ticket IDs from the current branch name, such as `ABC-123`
 - Lets you:
   - commit
@@ -24,7 +24,7 @@ Generate clean Git commit messages from staged changes using Codex.
 
 - Node.js 18 or newer
 - Git
-- Codex CLI installed and available in your shell
+- Codex CLI or Claude Code installed and available in your shell
 
 ## Installation
 
@@ -47,7 +47,20 @@ npm install @ahalberkamp/aicommit
 ./node_modules/.bin/aicommit
 ```
 
-### Option 2: Run locally from the repository
+### Option 2: Install with Homebrew
+
+Homebrew requires a tap repository for custom formulae. This repo now includes a ready
+formula at `Formula/aicommit.rb`, but to make the CLI installable you need to publish that
+formula from a tap repository such as `andihalberkamp/homebrew-tap`.
+
+After publishing the tap, users can install it like this:
+
+```bash
+brew tap andihalberkamp/tap
+brew install aicommit
+```
+
+### Option 3: Run locally from the repository
 
 ```bash
 git clone https://github.com/andihalberkamp/aiCommit.git
@@ -62,7 +75,7 @@ After that, you can run:
 aicommit
 ```
 
-### Option 3: Use directly with Node.js
+### Option 4: Use directly with Node.js
 
 ```bash
 node ./bin/aicommit.js
@@ -101,6 +114,8 @@ For the best experience, Git Bash or WSL is recommended.
 aicommit
 ```
 
+By default, `aicommit` tries `codex` first and falls back to `claude` if Codex is not installed.
+
 ### Stage a specific folder
 
 ```bash
@@ -113,13 +128,26 @@ aicommit src
 aicommit src package.json README.md
 ```
 
+### Choose the AI CLI explicitly
+
+```bash
+aicommit --provider codex
+aicommit --provider claude
+```
+
+You can also set the provider with an environment variable:
+
+```bash
+AICOMMIT_PROVIDER=claude aicommit src
+```
+
 ## Typical Flow
 
 When you run the command:
 
 1. The provided paths are staged with `git add`
 2. The staged diff is collected
-3. Codex generates a commit message
+3. The selected AI CLI generates a commit message
 4. You choose one of these actions:
 
 ```text
@@ -156,7 +184,13 @@ ABC-123: Prevent duplicate order creation during payment retry.
 
 ### `codex: command not found`
 
-Install the Codex CLI and make sure it is available in your `PATH`.
+Install the Codex CLI, or switch to Claude Code with `--provider claude` or
+`AICOMMIT_PROVIDER=claude`.
+
+### `claude: command not found`
+
+Install Claude Code, or switch to Codex with `--provider codex` or
+`AICOMMIT_PROVIDER=codex`.
 
 ### `aicommit: command not found`
 

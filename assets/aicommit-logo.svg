@@ -1,0 +1,57 @@
+<svg width="1400" height="420" viewBox="0 0 1400 420" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="iconGradient" x1="54" y1="54" x2="266" y2="266" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#21D4FD"/>
+      <stop offset="0.52" stop-color="#3B82F6"/>
+      <stop offset="1" stop-color="#7C3AED"/>
+    </linearGradient>
+    <linearGradient id="wordmarkGradient" x1="330" y1="80" x2="970" y2="240" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#0EA5E9"/>
+      <stop offset="0.55" stop-color="#2563EB"/>
+      <stop offset="1" stop-color="#7C3AED"/>
+    </linearGradient>
+    <linearGradient id="codexGradient" x1="0" y1="0" x2="186" y2="56" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#0F172A"/>
+      <stop offset="1" stop-color="#1D4ED8"/>
+    </linearGradient>
+    <linearGradient id="claudeGradient" x1="0" y1="0" x2="256" y2="56" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#7C2D12"/>
+      <stop offset="1" stop-color="#EA580C"/>
+    </linearGradient>
+    <filter id="softShadow" x="0" y="10" width="326" height="326" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feFlood flood-opacity="0" result="BackgroundImageFix"/>
+      <feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"/>
+      <feOffset dy="16"/>
+      <feGaussianBlur stdDeviation="18"/>
+      <feColorMatrix type="matrix" values="0 0 0 0 0.145098 0 0 0 0 0.227451 0 0 0 0 0.501961 0 0 0 0.18 0"/>
+      <feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow_1_1"/>
+      <feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow_1_1" result="shape"/>
+    </filter>
+  </defs>
+
+  <g filter="url(#softShadow)">
+    <rect x="38" y="38" width="250" height="250" rx="60" fill="white"/>
+    <rect x="48" y="48" width="230" height="230" rx="54" fill="url(#iconGradient)"/>
+    <path d="M108 168.5L158 218L244 126" stroke="white" stroke-width="30" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M221 76L227.18 91.82L243 98L227.18 104.18L221 120L214.82 104.18L199 98L214.82 91.82L221 76Z" fill="white"/>
+    <circle cx="98" cy="108" r="10" fill="white" fill-opacity="0.72"/>
+    <circle cx="244" cy="224" r="8" fill="white" fill-opacity="0.7"/>
+  </g>
+
+  <text x="336" y="170" fill="url(#wordmarkGradient)" font-family="Avenir Next, Poppins, Segoe UI, Helvetica, Arial, sans-serif" font-size="106" font-weight="800" letter-spacing="-2">AICommit</text>
+  <text x="340" y="218" fill="#475569" font-family="Avenir Next, Poppins, Segoe UI, Helvetica, Arial, sans-serif" font-size="26" font-weight="700" letter-spacing="3">WORKS WITH</text>
+
+  <g transform="translate(338 250)">
+    <rect width="186" height="58" rx="29" fill="url(#codexGradient)"/>
+    <text x="93" y="37" fill="white" text-anchor="middle" font-family="Avenir Next, Poppins, Segoe UI, Helvetica, Arial, sans-serif" font-size="28" font-weight="700">Codex</text>
+  </g>
+
+  <text x="547" y="288" fill="#64748B" font-family="Avenir Next, Poppins, Segoe UI, Helvetica, Arial, sans-serif" font-size="28" font-weight="700">+</text>
+
+  <g transform="translate(580 250)">
+    <rect width="256" height="58" rx="29" fill="url(#claudeGradient)"/>
+    <text x="128" y="37" fill="white" text-anchor="middle" font-family="Avenir Next, Poppins, Segoe UI, Helvetica, Arial, sans-serif" font-size="28" font-weight="700">Claude Code</text>
+  </g>
+
+  <text x="340" y="354" fill="#64748B" font-family="Avenir Next, Poppins, Segoe UI, Helvetica, Arial, sans-serif" font-size="24" font-weight="600" letter-spacing="1.3">AI-assisted Git commit messages for either coding CLI</text>
+</svg>
