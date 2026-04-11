@@ -1,0 +1,170 @@
+name: Release
+
+on:
+  release:
+    types:
+      - published
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Version to publish to the Homebrew tap, without the leading v
+        required: false
+
+permissions:
+  contents: read
+
+jobs:
+  publish-npm:
+    if: github.event_name == 'workflow_dispatch' || (github.event.release.draft == false && github.event.release.prerelease == false)
+    runs-on: ubuntu-latest
+    env:
+      PACKAGE_NAME: "@ahalberkamp/aicommit"
+      FORMULA_NAME: "aicommit"
+
+    steps:
+      - name: Check out source repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Resolve release version
+        id: version
+        shell: bash
+        run: |
+          if [[ "${GITHUB_EVENT_NAME}" == "workflow_dispatch" && -n "${{ github.event.inputs.version }}" ]]; then
+            version="${{ github.event.inputs.version }}"
+          elif [[ "${GITHUB_EVENT_NAME}" == "release" ]]; then
+            version="${GITHUB_REF_NAME#v}"
+          else
+            version="$(node -p "require('./package.json').version")"
+          fi
+
+          package_version="$(node -p "require('./package.json').version")"
+
+          if [[ "${version}" != "${package_version}" ]]; then
+            echo "Release version ${version} does not match package.json version ${package_version}." >&2
+            exit 1
+          fi
+
+          echo "version=${version}" >> "${GITHUB_OUTPUT}"
+          echo "tarball_url=https://registry.npmjs.org/${PACKAGE_NAME}/-/${FORMULA_NAME}-${version}.tgz" >> "${GITHUB_OUTPUT}"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run tests
+        run: npm test
+
+      - name: Verify package contents
+        run: npm run pack:check
+
+      - name: Configure npm auth
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          registry-url: https://registry.npmjs.org
+
+      - name: Publish to npm
+        run: npm publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+  update-homebrew-tap:
+    needs:
+      - publish-npm
+    if: github.event_name == 'workflow_dispatch' || (github.event.release.draft == false && github.event.release.prerelease == false)
+    runs-on: ubuntu-latest
+    env:
+      PACKAGE_NAME: "@ahalberkamp/aicommit"
+      FORMULA_NAME: "aicommit"
+      TAP_REPOSITORY: "andihalberkamp/homebrew-tap"
+
+    steps:
+      - name: Check out source repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Resolve release version
+        id: version
+        shell: bash
+        run: |
+          if [[ "${GITHUB_EVENT_NAME}" == "workflow_dispatch" && -n "${{ github.event.inputs.version }}" ]]; then
+            version="${{ github.event.inputs.version }}"
+          elif [[ "${GITHUB_EVENT_NAME}" == "release" ]]; then
+            version="${GITHUB_REF_NAME#v}"
+          else
+            version="$(node -p "require('./package.json').version")"
+          fi
+
+          package_version="$(node -p "require('./package.json').version")"
+
+          if [[ "${version}" != "${package_version}" ]]; then
+            echo "Release version ${version} does not match package.json version ${package_version}." >&2
+            exit 1
+          fi
+
+          echo "version=${version}" >> "${GITHUB_OUTPUT}"
+          echo "tarball_url=https://registry.npmjs.org/${PACKAGE_NAME}/-/${FORMULA_NAME}-${version}.tgz" >> "${GITHUB_OUTPUT}"
+
+      - name: Download npm tarball and compute SHA256
+        id: tarball
+        shell: bash
+        run: |
+          curl -fsSL "${{ steps.version.outputs.tarball_url }}" -o "/tmp/${FORMULA_NAME}-${{ steps.version.outputs.version }}.tgz"
+          sha256="$(sha256sum "/tmp/${FORMULA_NAME}-${{ steps.version.outputs.version }}.tgz" | awk '{print $1}')"
+          echo "sha256=${sha256}" >> "${GITHUB_OUTPUT}"
+
+      - name: Check out Homebrew tap
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ env.TAP_REPOSITORY }}
+          token: ${{ secrets.HOMEBREW_TAP_GITHUB_TOKEN }}
+          path: homebrew-tap
+
+      - name: Update formula
+        shell: bash
+        run: |
+          mkdir -p "homebrew-tap/Formula"
+          cat <<EOF > "homebrew-tap/Formula/${FORMULA_NAME}.rb"
+          class Aicommit < Formula
+            desc "Generate clean Git commit messages from staged changes using Codex or Claude Code"
+            homepage "https://github.com/andihalberkamp/aiCommit"
+            url "${{ steps.version.outputs.tarball_url }}"
+            sha256 "${{ steps.tarball.outputs.sha256 }}"
+            license "MIT"
+
+            depends_on "node"
+
+            def install
+              system "npm", "install", *std_npm_args(libexec)
+              bin.install_symlink libexec/"bin/aicommit"
+            end
+
+            test do
+              assert_match "Usage:", shell_output("#{bin}/aicommit --help")
+            end
+          end
+          EOF
+
+      - name: Commit and push tap update
+        shell: bash
+        working-directory: homebrew-tap
+        run: |
+          git add "Formula/${FORMULA_NAME}.rb"
+
+          if git diff --cached --quiet; then
+            echo "No tap changes to commit."
+            exit 0
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "Update ${FORMULA_NAME} to v${{ steps.version.outputs.version }}"
+          git push
