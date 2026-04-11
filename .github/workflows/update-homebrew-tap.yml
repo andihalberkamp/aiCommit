@@ -20,6 +20,9 @@ jobs:
     env:
       PACKAGE_NAME: "@ahalberkamp/aicommit"
       FORMULA_NAME: "aicommit"
+    permissions:
+      contents: read
+      id-token: write
 
     steps:
       - name: Check out source repository
@@ -28,7 +31,8 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: 24
+          registry-url: https://registry.npmjs.org
 
       - name: Resolve release version
         id: version
@@ -42,15 +46,11 @@ jobs:
             version="$(node -p "require('./package.json').version")"
           fi
 
-          package_version="$(node -p "require('./package.json').version")"
-
-          if [[ "${version}" != "${package_version}" ]]; then
-            echo "Release version ${version} does not match package.json version ${package_version}." >&2
-            exit 1
-          fi
-
           echo "version=${version}" >> "${GITHUB_OUTPUT}"
           echo "tarball_url=https://registry.npmjs.org/${PACKAGE_NAME}/-/${FORMULA_NAME}-${version}.tgz" >> "${GITHUB_OUTPUT}"
+
+      - name: Update package version to release version
+        run: npm version "${{ steps.version.outputs.version }}" --no-git-tag-version --allow-same-version
 
       - name: Install dependencies
         run: npm ci
@@ -61,16 +61,8 @@ jobs:
       - name: Verify package contents
         run: npm run pack:check
 
-      - name: Configure npm auth
-        uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          registry-url: https://registry.npmjs.org
-
       - name: Publish to npm
-        run: npm publish
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: npm publish --provenance --access public
 
   update-homebrew-tap:
     needs:
@@ -89,7 +81,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: 24
 
       - name: Resolve release version
         id: version
@@ -101,13 +93,6 @@ jobs:
             version="${GITHUB_REF_NAME#v}"
           else
             version="$(node -p "require('./package.json').version")"
-          fi
-
-          package_version="$(node -p "require('./package.json').version")"
-
-          if [[ "${version}" != "${package_version}" ]]; then
-            echo "Release version ${version} does not match package.json version ${package_version}." >&2
-            exit 1
           fi
 
           echo "version=${version}" >> "${GITHUB_OUTPUT}"
