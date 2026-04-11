@@ -1,3 +1,15 @@
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+**Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)*
+
+- [Code of Conduct](#code-of-conduct)
+  - [Our Pledge](#our-pledge)
+  - [Expected Behavior](#expected-behavior)
+  - [Unacceptable Behavior](#unacceptable-behavior)
+  - [Enforcement](#enforcement)
+
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
+
 # Code of Conduct
 
 ## Our Pledge

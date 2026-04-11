@@ -1,8 +1,8 @@
 class Aicommit < Formula
   desc "Generate clean Git commit messages from staged changes using Codex or Claude Code"
   homepage "https://github.com/andihalberkamp/aiCommit"
-  url "https://registry.npmjs.org/@ahalberkamp/aicommit/-/aicommit-1.0.0.tgz"
-  sha256 "1777536ec7a3223415bf5ba3c457401f68bc48a700e099ef6ff401535fdf02f3"
+  url "https://registry.npmjs.org/@ahalberkamp/aicommit/-/aicommit-1.0.1.tgz"
+  sha256 "93197e68ad1d89a714d8b051706db33ac8d4388a5fd0ce56773f586aa0c3c512"
   license "MIT"
 
   depends_on "node"
