@@ -4,9 +4,12 @@ import test from "node:test";
 import {
   buildPrompt,
   escapeShellArg,
+  generateMessage,
   HELP_TEXT,
+  parseCliArgs,
   normalizeMessage,
   pushCurrentBranch,
+  resolveProvider,
   runCli,
   stagePaths
 } from "../lib/aicommit.js";
@@ -58,6 +61,65 @@ test("buildPrompt includes the ticket rule only when a ticket is present", () =>
   assert.match(withTicket, /start with "ABC-123:"/);
   assert.match(withTicket, /ABC-123: Prevent duplicate order creation during payment retry\./);
   assert.doesNotMatch(withoutTicket, /start with "/);
+});
+
+test("parseCliArgs reads provider flags and env overrides", () => {
+  assert.deepEqual(parseCliArgs(["src"], { AICOMMIT_PROVIDER: "claude" }), {
+    paths: ["src"],
+    showHelp: false,
+    requestedProvider: "claude"
+  });
+
+  assert.deepEqual(parseCliArgs(["--provider", "codex", "src"], {}), {
+    paths: ["src"],
+    showHelp: false,
+    requestedProvider: "codex"
+  });
+
+  assert.deepEqual(parseCliArgs(["--provider=claude", "src"], {}), {
+    paths: ["src"],
+    showHelp: false,
+    requestedProvider: "claude"
+  });
+});
+
+test("resolveProvider prefers an explicit provider and falls back to Claude when Codex is unavailable", () => {
+  const commands = [];
+  const runCommandImpl = (command) => {
+    commands.push(command);
+
+    if (command === "codex --version") {
+      throw new Error("codex missing");
+    }
+
+    if (command === "claude --version") {
+      return "1.0.0";
+    }
+
+    throw new Error(`Unexpected command: ${command}`);
+  };
+
+  const autoResolvedProvider = resolveProvider(null, runCommandImpl);
+  const explicitProvider = resolveProvider("claude", runCommandImpl);
+
+  assert.equal(autoResolvedProvider.name, "claude");
+  assert.equal(explicitProvider.name, "claude");
+  assert.ok(commands.includes("codex --version"));
+  assert.ok(commands.includes("claude --version"));
+});
+
+test("generateMessage uses the right command for Codex and Claude Code", () => {
+  const commands = [];
+  const runCommandImpl = (command) => {
+    commands.push(command);
+    return "message";
+  };
+
+  generateMessage("context", null, "codex", runCommandImpl);
+  generateMessage("context", null, "claude", runCommandImpl);
+
+  assert.match(commands[0], /^codex exec '/);
+  assert.match(commands[1], /^claude -p '/);
 });
 
 test("normalizeMessage trims quotes and adds the missing period", () => {
@@ -207,4 +269,59 @@ test("runCli commits the normalized Codex message on confirmation", async () => 
   assert.equal(rl.closed, true);
   assert.deepEqual(rl.prompts, ["(y) commit  (p) commit+push  (e) edit  (r) regenerate  (n) abort: "]);
   assert.ok(logs.some((message) => stripAnsi(message).includes("Suggested commit:")));
+});
+
+test("runCli uses Claude Code when selected explicitly", async () => {
+  const rl = createInterfaceStub(["n"]);
+  const commands = [];
+
+  const exec = (command) => {
+    commands.push(command);
+
+    if (command === "git rev-parse --is-inside-work-tree") {
+      return "true";
+    }
+
+    if (command === "claude --version") {
+      return "1.0.0";
+    }
+
+    if (command === "git add 'src'") {
+      return "";
+    }
+
+    if (command === "git diff --cached --name-only") {
+      return "src/index.js";
+    }
+
+    if (command === "git branch --show-current") {
+      return "feature/claude";
+    }
+
+    if (command === "git diff --cached --stat") {
+      return " src/index.js | 1 +";
+    }
+
+    if (command === "git diff --cached -U3 | head -n 120") {
+      return "+ console.log('test');";
+    }
+
+    if (command.startsWith("claude -p ")) {
+      return "improve provider support";
+    }
+
+    throw new Error(`Unexpected command: ${command}`);
+  };
+
+  const result = await runCli({
+    argv: ["--provider", "claude", "src"],
+    exec,
+    createInterface: () => rl,
+    log: () => {},
+    errorLog: () => {}
+  });
+
+  assert.equal(result.status, "aborted");
+  assert.ok(commands.includes("claude --version"));
+  assert.ok(commands.some((command) => command.startsWith("claude -p ")));
 });
